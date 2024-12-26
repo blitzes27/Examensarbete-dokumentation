@@ -1,0 +1,66 @@
+---
+# /roles/12_install_rook/tasks/main.yaml
+# Install rook, a multi-node storage system
+# https://rook.io/docs/rook/latest-release/Getting-Started/quickstart/
+
+# install rook
+- name: Install Rook
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+    kubeconfig: "./admin.conf"
+  loop:
+    - "roles/12_install_rook/files/common.yaml"
+    - "roles/12_install_rook/files//crds.yaml"
+    - "roles/12_install_rook/files/operator.yaml"
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: inventory_hostname in groups['master']
+
+  
+
+# create the rook directory
+- name: create /home/{{ ansible_user }}/rook directory
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/rook"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0777
+    recurse: true
+  when: inventory_hostname in groups['master']
+
+# https://rook.io/docs/rook/latest-release/CRDs/Cluster/host-cluster/#specific-nodes-and-devices
+
+# create the cluster.yaml config, variables are in the inventory/group_vars/all_vm.yaml
+- name: Create cluster.yaml config
+  ansible.builtin.template:
+    src: "cluster.yaml.j2"
+    dest: "/home/{{ ansible_user }}/rook/cluster.yaml"
+  when: inventory_hostname in groups['master']
+
+
+# Apply the cluster.yaml and start the cluster
+- name: Apply cluster.yaml and start the cluster
+  kubernetes.core.k8s:
+    state: present
+    src: "/home/{{ ansible_user }}/rook/cluster.yaml"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  run_once: true
+  when: inventory_hostname in groups['master']
+
+# Create the filesystem & Storageclass for the cluster
+- name: Create filesystem and storageclass
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+    kubeconfig: "./admin.conf"
+  loop:
+    - "roles/12_install_rook/files/filesystem.yaml"
+    - "roles/12_install_rook/files/storageclass.yaml"
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: inventory_hostname in groups['master']

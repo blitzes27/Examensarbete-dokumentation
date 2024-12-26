@@ -1,0 +1,26 @@
+---
+# /tasks/clone_vm.yaml
+# This task clones VMs
+
+# Clone the VM
+- name: Clone VM {{ item.vm_name }}
+  ansible.builtin.shell: |
+    qm clone {{ vm_id_template }} {{ item.vm_id }} --name {{ item.vm_name }}
+  args:
+    executable: /bin/bash
+
+# Set VM options
+- name: Configure VM settings for {{ item.vm_name }}
+  ansible.builtin.shell: |
+    qm set {{ item.vm_id }} \
+      --net0 virtio,macaddr={{ item.mac_address }},bridge=vmbr0,firewall=1 \
+      --agent enabled=1 \
+  args:
+    executable: /bin/bash
+
+# Start the VM
+- name: Start VM {{ item.vm_name }}
+  ansible.builtin.shell: |
+    qm start {{ item.vm_id }}
+  args:
+    executable: /bin/bash

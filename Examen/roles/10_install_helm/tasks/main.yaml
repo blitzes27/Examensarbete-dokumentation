@@ -1,0 +1,45 @@
+---
+# /roles/10_install_helm/tasks/main.yaml
+# this task installs Helm on the master node
+# https://helm.sh/docs/intro/install/
+
+# Download Helm apt repository key
+- name: Download Helm apt repository key
+  ansible.builtin.shell: |
+    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
+  args:
+    creates: /usr/share/keyrings/helm.gpg
+    executable: /bin/bash
+  when: inventory_hostname in groups['master']
+
+# Install required packages
+- name: Install required packages
+  ansible.builtin.apt:
+    name: apt-transport-https
+    state: present
+  when: inventory_ho
+
+# Add Helm apt repository
+- name: Add Helm apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main"
+    state: present
+  when: inventory_hostname in groups['master']
+
+# Install Helm
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
+  when: inventory_hostname in groups['master']
+
+# create the Helm directory
+- name: create /home/{{ ansible_user }}/helm directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/helm
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0777
+    recurse: true
+  when: inventory_hostname in groups['master']

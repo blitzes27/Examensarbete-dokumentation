@@ -1,0 +1,42 @@
+---
+# /roles/8_install_cri-dockerd/tasks/main.yaml
+# install cri-dockerd
+# https://github.com/Mirantis/cri-dockerd
+# The service file for cri-dockerd comes from the cri-dockerd repo
+# https://github.com/Mirantis/cri-dockerd/blob/master/packaging/systemd/cri-docker.service
+# And the socket file
+# https://github.com/Mirantis/cri-dockerd/blob/master/packaging/systemd/cri-docker.socket
+
+
+# copy cri-dockerd .deb package to VM
+- name: Copy cri-dockerd .deb package to VM
+  ansible.builtin.copy:
+    src: cri-dockerd_0.3.15.3-0.debian-bookworm_amd64.deb
+    dest: /tmp/cri-dockerd.deb
+    mode: '0644'
+
+# Install cri-dockerd
+- name: Install cri-dockerd
+  ansible.builtin.apt:
+    deb: /tmp/cri-dockerd.deb
+
+# Copy cri-dockerd systemd service file
+- name: Copy cri-dockerd systemd service file
+  ansible.builtin.copy:
+    src: cri-docker.service
+    dest: /etc/systemd/system/cri-docker.service
+    mode: '0644'
+
+# Copy cri-dockerd systemd socket file
+- name: Copy cri-dockerd systemd socket file
+  ansible.builtin.copy:
+    src: cri-docker.socket
+    dest: /etc/systemd/system/cri-docker.socket
+    mode: '0644'
+
+# Enable and start cri-dockerd
+- name: enable and start cri-dockerd
+  ansible.builtin.systemd:
+    name: cri-docker
+    state: started
+    enabled: yes

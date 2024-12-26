@@ -1,0 +1,11 @@
+---
+# playbook.yaml
+
+############# CLONE ALL VM's #############################
+- import_playbook: playbook:1_clone.yaml
+
+############# CREATE THE VIRTUAL ENV  #############################
+- import_playbook: playbook:2_virtual.yaml
+
+############ PLAY 3 KUBERNETES #############################
+- import_playbook: playbook:3_kubernetes.yaml

@@ -1,0 +1,77 @@
+---
+# /roles/7_install_kubernetes/tasks/main.yaml
+# this role installs the required packages for Kubernetes
+# according to the Kubernetes documentation
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+# Install required packages
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: yes
+
+# set permissions for /etc/apt/keyrings
+# according to the Kubernetes documentation
+- name: Set permissions for /etc/apt/keyrings
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0755
+
+# Download Kubernetes apt repository key
+- name: Download Kubernetes apt repository key
+  ansible.builtin.shell: |
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  args:
+    executable: /bin/bash
+    
+# Add Kubernetes apt repository
+- name: Add Kubernetes apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /"
+    state: present
+
+# Install Kubernetes packages
+- name: Install Kubernetes packages
+  ansible.builtin.apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+# Hold kubelet, kubeadm, and kubectl
+- name: Hold kubelet, kubeadm, and kubectl
+  ansible.builtin.shell: |
+    apt-mark hold kubelet kubeadm kubectl
+  args:
+    executable: /bin/bash
+
+# Enable and start kubelet service
+- name: Enable and start kubelet service
+  ansible.builtin.systemd:
+    name: kubelet
+    enabled: true
+    state: started
+
+# Create directory for kubernetes
+- name: Create directory for kubernetes
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/kubernetes
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0777
+    recurse: true
+  when: inventory_hostname in groups['master']
+
+
+

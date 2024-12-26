@@ -1,0 +1,95 @@
+---
+# /roles/9_initialize_kubernetes/tasks/main.yaml
+# this role initializes the Kubernetes and 
+# joins worker nodes to the cluster
+
+# Disable swap
+- name: Disable swap
+  ansible.builtin.shell: |
+    swapoff -a
+    sed -i '/\/swap\.img/ s/^/#/' /etc/fstab
+  args:
+    executable: /bin/bash
+
+# Initialize Kubernetes cluster
+- name: Initialize Kubernetes cluster
+  ansible.builtin.shell: |
+    kubeadm init --pod-network-cidr=10.0.0.0/24 --cri-socket=unix:///var/run/cri-dockerd.sock
+  args:
+    creates: "/etc/kubernetes/admin.conf" # only run if the file does not exist
+    executable: /bin/bash
+  register: kubeadm_output # save the output to a variable
+  when: inventory_hostname in groups['master']
+
+# Print the output of the kubeadm init
+- name: Print the output of the kubeadm init
+  ansible.builtin.debug:
+    msg: "{{ kubeadm_output.stdout }}"
+  when: inventory_hostname in groups['master']
+
+
+# Save kubeadm init output to a file in /tmp on the master node
+- name: Save kubeadm init output to a file
+  ansible.builtin.shell: |
+    echo "{{ kubeadm_output.stdout }}" > /tmp/kubeadm_output.txt
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['master']
+
+# Copy kubeadm init output file to the files folder in 9_initialize_kubernetes role
+- name: Fetch kubeadm init output to local files folder
+  ansible.builtin.fetch:
+    src: /tmp/kubeadm_output.txt
+    dest: "roles/9_initialize_kubernetes/files/kubeadm_output.txt"
+    flat: yes
+  when: inventory_hostname in groups['master']
+
+# - name: Pause for 4 seconds before reading the file
+#   ansible.builtin.pause:
+#     seconds: 4
+
+# Read kubeadm init output file
+- name: Read kubeadm init output file from local machine
+  ansible.builtin.set_fact:
+    init_output: "{{ lookup('file', 'roles/9_initialize_kubernetes/files/kubeadm_output.txt') }}"
+
+
+# Extract kubeadm join command from init output
+- name: Extract kubeadm join command from init output
+  ansible.builtin.set_fact:
+    join_command: "{{ init_output | regex_search('kubeadm join.*') }}"
+
+# Join worker nodes to Kubernetes cluster
+- name: Join worker nodes to Kubernetes cluster
+  ansible.builtin.shell: |
+    {{ join_command }} --cri-socket=unix:///var/run/cri-dockerd.sock
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['worker']
+
+# change the permissions of the kubeconfig file
+- name: Change permissions of the kubeconfig file
+  ansible.builtin.file:
+    path: "/etc/kubernetes/admin.conf"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+  when: inventory_hostname in groups['master']
+
+- name: copy the kubeconfig file to the local machine
+  ansible.builtin.fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ./admin.conf
+    flat: yes
+    mode: 0600
+  when: inventory_hostname in groups['master']
+
+# Apply Calico network plugin
+- name: Apply Calico network plugin
+  ansible.builtin.shell: |
+    kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  when: inventory_hostname in groups['master']

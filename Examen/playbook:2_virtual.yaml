@@ -1,0 +1,16 @@
+---
+# Playbook 2 - Virtual Env
+- name: Playbook 2 - Virtual Env
+  hosts: all_vm
+  become: true
+  gather_facts: true
+  strategy: free
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.12
+
+  roles:
+    - 3_energy_savings
+    - 4_change_hostname
+    - 4.1_install_venv
+
+

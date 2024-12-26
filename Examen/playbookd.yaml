@@ -1,0 +1,20 @@
+---
+# /roles/delete_vm/tasks/main.yaml
+# This playbook stops & deletes VMs
+
+- name: Stop & Delete VM nuc
+  hosts: nuc_zotac_group
+  become: true
+  gather_facts: true
+  strategy: free
+  
+  tasks:
+    # || true is used to ignore the error if the VM is not found
+    - name: Stop and erase VM on nuc
+      ansible.builtin.shell: |
+        qm status {{ item.vm_id }} && qm stop {{ item.vm_id }} || true && qm destroy {{ item.vm_id }} || true
+      loop: "{{ vm_list }}"
+      loop_control:
+        label: "Killing {{ item.vm_name }}"
+      args:
+        executable: /bin/bash

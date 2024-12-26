@@ -1,0 +1,19 @@
+---
+# /roles/3_energy_savings/tasks/main.yaml
+# this role sets the energy saving settings for the VMs
+
+############## NODE ALL ################
+
+# Disable sleep and hibernation
+- name: Disable sleep and hibernation
+  ansible.builtin.copy:
+    dest: /etc/systemd/sleep.conf
+    content: |
+      [Sleep]
+      AllowSuspend=no
+      AllowHibernation=no
+      AllowHybridSleep=no
+      AllowSuspendThenHibernate=no
+    owner: root
+    group: root
+    mode: 0644

@@ -1,0 +1,7 @@
+kubectl -n rook-ceph get cephfilesystem
+kubectl -n rook-ceph get pod
+kubectl -n rook-ceph get cephfilesystem
+kubectl get sc
+kubectl create -f logstash-pvc.yaml
+kubectl get pvc --all-namespaces 
+kubectl delete -f kube-registry.yaml

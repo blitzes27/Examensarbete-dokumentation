@@ -1,0 +1,45 @@
+---
+# /roles/11_install_metallb/tasks/main.yaml
+# this role installs Metallb on the master node
+
+# copy the pre configured file for the metric server
+- name: Copy the pre configured metric server file
+  ansible.builtin.copy:
+    src: "components.yaml"
+    dest: "/tmp/components.yaml"
+    owner: "{{ ansible_user}}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+# Start the metric server
+- name: Start the metric server
+  ansible.builtin.shell: |
+    kubectl apply -f /tmp/components.yaml
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  when: inventory_hostname in groups['master']
+
+
+# Start the metallb loadbalancer in the cluster. run as the ansible user
+- name: Start the metallb loadbalancer. Takes 75 seconds to start
+  ansible.builtin.shell: |
+    kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+    sleep 75
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  when: inventory_hostname in groups['master']
+
+# Apply the pre configured file for metallb
+- name: Apply the pre configured Metallb.yaml
+  kubernetes.core.k8s:
+    state: present
+    src: "roles/11_install_metallb/files/metallb.yaml"
+    kubeconfig: "./admin.conf"
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: inventory_hostname in groups['master']

@@ -1,0 +1,18 @@
+---
+# /playbook:1_clone.yaml
+- name: Clone VMs
+  hosts: nuc_zotac_group
+  become: true
+  gather_facts: true
+  #strategy: free
+  
+  tasks:
+    # Clone and configure VMs
+    - name: Clone and configure VMs
+      include_tasks: ./tasks/task_clone_vm.yaml
+      loop: "{{ vm_list }}"
+
+    # Give the last VM some time to start before ansible tries to connect
+    - name: Pause for last VM to start
+      ansible.builtin.pause:
+        seconds: 13

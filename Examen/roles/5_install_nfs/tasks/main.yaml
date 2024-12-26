@@ -1,0 +1,28 @@
+---
+# / roles/5_install_nfs/tasks/main.yaml
+# This role installs nfs-common and mounts an nfs share
+
+# Install nfs-common
+- name: Install nfs-common
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+    update_cache: yes
+
+# Create directory for nfs share
+- name: Create directory for nfs share
+  ansible.builtin.file:
+    path: "{{ MOUNT_PATH }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0777
+
+# Mount NFS share, Vars are defined in /inventory/group_vars/all_vm.yaml
+- name: Mount NFS share
+  ansible.builtin.mount:
+    src: "{{ NFS_IP }}:{{  NFS_PATH }}"
+    path: "{{ MOUNT_PATH }}"
+    fstype: nfs
+    opts: defaults
+    state: mounted

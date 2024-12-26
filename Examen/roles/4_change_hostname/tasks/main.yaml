@@ -1,0 +1,34 @@
+---
+# /roles/4_change_hostname/tasks/main.yaml
+# this task changes the hostname of the VMs, updates /etc/hosts
+# and reboots them
+
+############## NODE ALL ################
+
+- name: Set the hostname to match inventory name
+  ansible.builtin.shell: |
+    hostnamectl set-hostname {{ inventory_hostname }}
+  args:
+    executable: /bin/bash
+
+- name: Update /etc/hosts to match hostname
+  ansible.builtin.replace:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s.*'
+    replace: |
+      127.0.1.1   {{ inventory_hostname }}
+      {{ ansible_host }}   {{ inventory_hostname }}
+
+
+############## REBOOT #######################
+
+# set KUBECONFIG export in .bashrc file
+- name: set KUBECONFIG export in .bashrc file
+  ansible.builtin.lineinfile:
+    path: "/home/{{ ansible_user }}/.bashrc"
+    line: 'export KUBECONFIG=/etc/kubernetes/admin.conf'
+    insertafter: EOF
+
+
+- name: reboot VM
+  ansible.builtin.reboot:

@@ -1,0 +1,10 @@
+---
+# /roles/20_copy_files/tasks/main.yaml
+# This role copies necessery files to the master node
+
+
+- name: Copy files to master node
+  ansible.builtin.copy:
+    src: deploy.yaml
+    dest: /home/{{ ansible_user }}/kubernetes
+  when: inventory_hostname in groups['master']

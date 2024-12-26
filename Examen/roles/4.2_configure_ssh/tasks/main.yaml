@@ -1,0 +1,42 @@
+---
+# /roles/4.2_configure_ssh/tasks/main.yaml
+# This role configures SSH connections between all VMs
+
+# Add public key to authorized_keys
+- name: Add public key to authorized_keys
+  ansible.builtin.authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', 'exam_id_rsa.pub') }}" # local path
+
+# 
+
+# Add SSH config file entries
+- name: Add SSH config file entries
+  ansible.builtin.blockinfile:
+    path: /home/{{ ansible_user }}/.ssh/config
+    create: yes
+    marker: ""
+    block: |
+      {% for host in ssh_hosts %}
+      {% if host.ip != ansible_host %}
+      Host {{ host.name }}
+        HostName {{ host.ip }}
+        User {{ ansible_user }}
+        IdentityFile /home/{{ ansible_user }}/.ssh/exam_id_rsa
+        IdentitiesOnly yes
+      {% endif %}
+      {% endfor %}
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+
+
+# Adds IP to known hosts
+- name: Add all IPs in all_vm to known_hosts except current host
+  ansible.builtin.known_hosts:
+    path: /home/{{ ansible_user }}/.ssh/known_hosts
+    name: "{{ item }}"
+    key: "{{ lookup('pipe', 'ssh-keyscan -H ' + item) }}"
+  loop: "{{ groups['all_vm'] | map('extract', hostvars, 'ansible_host') | list }}" # jinja2 requires ' ' around the variable to not interpret it as a string
+  when: item != ansible_host

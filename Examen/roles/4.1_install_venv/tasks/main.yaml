@@ -1,0 +1,35 @@
+---
+# /roles/4_install_venv/tasks/main.yaml
+# https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/
+# https://packaging.python.org/en/latest/guides/installing-using-linux-tools/
+# This role installs the virtual environment and the dependencies
+# on the master node
+
+# Install venv dependencies
+- name: Install venv dependencies
+  ansible.builtin.apt:
+    name: 
+      - python3-venv
+      - python3-pip
+    state: present
+  when: inventory_hostname in groups['master']
+
+# copy requirements.txt
+- name: Copy requiremments.txt
+  ansible.builtin.copy:
+    src: ./requirements.txt
+    dest: /home/{{ ansible_user }}/requirements.txt
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0644
+  when: inventory_hostname in groups['master']
+
+# Create virtual envoirment & Install requirements.txt
+- name: Create virtual envoirment & Install requirements.txt
+  ansible.builtin.shell: |
+    python3 -m venv /home/{{ ansible_user }}/venv && \
+    source /home/{{ ansible_user }}/venv/bin/activate && \
+    pip install -r /home/{{ ansible_user }}/requirements.txt
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['master']
