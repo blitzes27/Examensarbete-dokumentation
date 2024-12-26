@@ -1,0 +1,63 @@
+---
+# /inventory/hosts.yaml
+all:
+  vars:
+    ansible_ssh_private_key_file: /Users/ZzZz/XxXx/.ssh/id_rsa
+
+  children:
+###############  NUC_ZOTAC_GROUP  ############################################################################################
+
+    nuc_zotac_group:
+      children:
+############################  NUC  ######
+        nuc:
+          hosts:
+            nuc_host:
+              ansible_host: 192.168.y.x
+############################  ZOTAC  ######
+        zotac:
+          hosts:
+            zotac_host:
+              ansible_host: 192.168.y.x
+
+######################  ALL_VM  #####################################################################################
+    all_vm:
+      children:
+####################  NUC_VM  #######################################################################################
+        nuc_vm:
+          children:
+############################ NUC  MASTER  ############################
+            master:
+              vars:
+                ansible_python_interpreter: /home/administrator/venv/bin/python
+              hosts:
+                node1:
+                  ansible_host: 192.168.y.x
+############################ NUC  WORKER  ############################
+            worker:
+              vars:
+                ansible_python_interpreter: /usr/bin/python3.12
+              hosts:
+                node2:
+                  ansible_host: 192.168.y.x
+                node3:
+                  ansible_host: 192.168.y.x
+                node4:
+                  ansible_host: 192.168.y.x
+#####################  ZOTAC_VM  ######################################################################################
+        zotac_vm:
+          children:
+############################ ZOTAC  WORKER  ############################
+            worker:
+              vars:
+                ansible_python_interpreter: /usr/bin/python3.12
+              hosts:
+                ceph1:
+                  ansible_host: 192.168.y.x
+                ceph2:
+                  ansible_host: 192.168.y.x
+                ceph3:
+                  ansible_host: 192.168.y.x
+                ceph4:
+                  ansible_host: 192.168.y.x
+###########################################################################################################

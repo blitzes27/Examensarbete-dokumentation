@@ -1,0 +1,28 @@
+---
+# /inventory/host_vars/nuc_host.yaml
+ansible_python_interpreter: xxyyzz
+ansible_user: xxyyzz
+vm_id_template: 89756
+
+vm_list:
+  - vm_id: 910000
+    mac_address: 52:54:00:84:e3:b1
+    vm_name: node1
+  - vm_id: 920000
+    mac_address: 52:54:00:84:e3:b2
+    vm_name: node2
+  - vm_id: 930000
+    mac_address: 52:54:00:84:e3:b3
+    vm_name: node3
+  - vm_id: 940000
+    mac_address: 52:54:00:84:e3:b4
+    vm_name: node4
+  - vm_id: 950000
+    mac_address: 52:54:00:84:e3:b5
+    vm_name: node5
+  - vm_id: 960000
+    mac_address: 52:54:00:84:e3:b6
+    vm_name: node6
+  - vm_id: 970000
+    mac_address: 52:54:00:84:e3:b7
+    vm_name: node7

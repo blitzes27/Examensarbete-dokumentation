@@ -1,0 +1,19 @@
+---
+# /inventory/host_vars/zotac_host.yaml
+ansible_python_interpreter: xxyyzz
+ansible_user: xxyyzz
+vm_id_template: 49704
+
+vm_list:
+  - vm_id: 51000
+    vm_name: ceph1
+    mac_address: bc:24:11:37:7e:21
+  - vm_id: 52000
+    vm_name: ceph2
+    mac_address: bc:24:11:37:7e:22
+  - vm_id: 53000
+    vm_name: ceph3
+    mac_address: bc:24:11:37:7e:23
+  - vm_id: 54000
+    vm_name: ceph4
+    mac_address: bc:24:11:37:7e:24

@@ -1,0 +1,45 @@
+---
+# /inventory/group_vars/all_vm.yaml
+ansible_user: administrator
+
+# NFS variables
+NFS_IP: xxyyzz
+NFS_PATH: xxyyzz
+MOUNT_PATH: xxyyzz
+
+# rook variables
+ceph_hosts:
+  - name: node2
+    ip: 192.168.x.y
+    hdd: sdb
+  - name: node3
+    ip: 192.168.x.y
+    hdd: sdb
+  - name: node4
+    ip: 192.168.x.y
+    hdd: sdb
+
+# ssh hosts
+ssh_hosts:
+  - name: ceph4
+    ip: 192.168.x.y
+  - name: ceph3
+    ip: 192.168.x.y
+  - name: ceph2
+    ip: 192.168.x.y
+  - name: ceph1
+    ip: 192.168.x.y
+  - name: node7
+    ip: 192.168.x.y
+  - name: node6
+    ip: 192.168.x.y
+  - name: node5
+    ip: 192.168.x.y
+  - name: node4
+    ip: 192.168.x.y
+  - name: node3
+    ip: 192.168.x.y
+  - name: node2
+    ip: 192.168.x.y
+  - name: node1
+    ip: 192.168.x.y

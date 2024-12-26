@@ -15,14 +15,6 @@ vault.yaml
 .DS_Store
 vars.yaml
 vars2.yaml
-inventory/
-admin.conf
-inventory/group_vars/all_vm.yaml
-inventory/group_vars/nuc_host.yaml
-inventory/group_vars/zota_host.yaml
-vault.yaml
-roles/9_initialize_kubernetes/files/kubeadm_output.txt
-roles/9_initalize_kubernetes/files/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -410,10 +402,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-roles/initialize_kubernetes/files/kubeadm_output.txt
-roles/initialize_kubernetes/files/kubeadm_output.txt
-/roles/9_initialize_kubernetes/files
-/inventory
-inventory/group_vars/all_vm.yaml
-inventory/hosts.yaml
-inventory/group_vars/all_vm.yaml
+
