@@ -15,6 +15,7 @@ vault.yaml
 .DS_Store
 vars.yaml
 vars2.yaml
+admin.conf
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
