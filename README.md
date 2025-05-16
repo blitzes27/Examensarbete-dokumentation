@@ -1,5 +1,5 @@
 # Examensarbete-dokumentation
-Examens arbete dokumentation
+Examensarbete dokumentation
 
 [Förstudie](<Förstudie Examensarbete.pdf>)
 
